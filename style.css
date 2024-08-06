@@ -1,7 +1,7 @@
 .bg_red {
-  background-color: red;
+  background-color: red !important;
 }
 
 .color_red {
-  color: red;
+  color: red !important;
 }
