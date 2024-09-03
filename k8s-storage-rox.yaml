@@ -1,0 +1,78 @@
+# // Create k8 storage with access mode is ReadWriteOnce
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k8s-storage
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  namespace: k8s-storage
+  name: k8s-storage-class
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: k8s-storage
+  name: rox-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: k8s-storage-class
+  hostPath:
+    path: /var/lib/k8s-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: k8s-storage
+  name: rox-pvc
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: rox-pv
+  storageClassName: k8s-storage-class
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-storage-rox
+  namespace: k8s-storage
+  labels:
+    app: rox-pod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rox-pod
+  template:
+    metadata:
+      labels:
+        app: rox-pod
+    spec:
+      containers:
+      - name: rox-pod
+        image: depops_vt_src-server
+        imagePullPolicy: Never
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        volumeMounts:
+        - name: rox-pv-storage
+          mountPath: /app/logs
+      volumes:
+      - name: rox-pv-storage
+        persistentVolumeClaim:
+          claimName: rox-pvc

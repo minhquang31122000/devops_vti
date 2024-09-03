@@ -1,9 +1,3 @@
-# workload statefulSet
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: nginx-deployment
----
 apiVersion: v1
 kind: Service
 metadata:
