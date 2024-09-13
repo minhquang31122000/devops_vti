@@ -1,3 +1,6 @@
 node_modules/
 db/
 compose.yaml
+HelloTerraform/.terraform
+HelloTerraform/terraform.tfstate
+HelloTerraform/terraform.tfstate.backup
