@@ -1,6 +1,5 @@
-node_modules/
-db/
-compose.yaml
-HelloTerraform/.terraform
-HelloTerraform/terraform.tfstate
-HelloTerraform/terraform.tfstate.backup
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+terraform.tfstate.d
