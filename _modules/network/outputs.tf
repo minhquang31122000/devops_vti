@@ -1,13 +1,18 @@
 output "vpc_id" {
-  value = aws_vpc.minhquang-vpc.id
+  value = module.vpc.vpc_id
 }
-
-#export the subnet public
-
-output "public_subnet_id" {
-  value = data.aws_subnets.public.ids
+output "vpc_private_subnet_ids" {
+  value = module.vpc.private_subnets
 }
-
-output "private_subnet_id" {
-  value = data.aws_subnets.private.ids
+output "vpc_public_subnet_ids" {
+  value = module.vpc.public_subnets
+}
+output "vpc_db_subnet_group_id" {
+  value = module.vpc.database_subnet_group
+}
+output "intra_subnet_ids" {
+  value = module.vpc.intra_subnets
+}
+output "vpc_cidr" {
+  value = module.vpc.vpc_cidr_block
 }

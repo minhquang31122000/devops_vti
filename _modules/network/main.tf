@@ -1,81 +1,53 @@
 locals {
-  azs = var.azs
+  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+  identify = format("mmhDDMMYY", timestamp())
+
 }
 
-// Create the vpc
-resource "aws_vpc" "minhquang-vpc" {
-  cidr_block = var.cidrvpc
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.13.0"
 
-  tags = var.tags
-}
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 
-//create the public subnet
-resource "aws_subnet" "public" {
-  vpc_id            = aws_vpc.minhquang-vpc.id
-  count             = local.azs
-  cidr_block        = cidrsubnet(aws_vpc.minhquang-vpc.cidr_block, 8, count.index)
-  availability_zone = var.azname[count.index]
-  tags              = merge(var.tags, { Name = "${var.vpc_name}-public-subnet-${count.index}" })
-}
+  azs             = local.azs
+  private_subnets = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k)]
+  public_subnets  = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 8, k + 48)]
+  intra_subnets   = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 8, k + 52)]
 
-//create internet gateway
-resource "aws_internet_gateway" "minhquang-igw" {
-  vpc_id = aws_vpc.minhquang-vpc.id
-  tags   = merge(var.tags, { Name = "${var.vpc_name}-igw" })
-}
+  enable_nat_gateway     = var.enable_nat_gateway
+  single_nat_gateway     = var.single_nat_gateway
+  one_nat_gateway_per_az = var.single_nat_gateway ? false : true
+  enable_dns_hostnames   = var.enable_dns_hostnames
 
-//create route
-resource "aws_route" "minhquang-route" {
-  route_table_id         = aws_vpc.minhquang-vpc.default_route_table_id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.minhquang-igw.id
-}
+  create_database_subnet_group           = var.create_database_subnet_group
+  create_database_subnet_route_table     = var.create_database_subnet_route_table
+  create_database_internet_gateway_route = var.create_database_internet_gateway_route
 
-// associate the public subnet with to main route table with igw
-resource "aws_route_table_association" "minhquang-public-subnet-rtb" {
-  count          = local.azs
-  subnet_id      = element(aws_subnet.public[*].id, count.index)
-  route_table_id = aws_vpc.minhquang-vpc.default_route_table_id
-}
+  enable_flow_log                       = var.enable_flow_log
+  vpc_flow_log_iam_role_name            = "${var.vpc_name}-${local.identify}-follow-log-role"
+  vpc_flow_log_iam_role_use_name_prefix = false
+  create_flow_log_cloudwatch_iam_role   = var.create_flow_log_cloudwatch_iam_role
+  create_flow_log_cloudwatch_log_group  = var.create_flow_log_cloudwatch_log_group
+  flow_log_max_aggregation_interval     = 60
 
-// create the private subnet
-resource "aws_subnet" "private" {
-  vpc_id            = aws_vpc.minhquang-vpc.id
-  count             = local.azs
-  cidr_block        = cidrsubnet(aws_vpc.minhquang-vpc.cidr_block, 8, count.index + local.azs)
-  availability_zone = var.azname[count.index]
-  tags              = merge(var.tags, { Name = "${var.vpc_name}-private-subnet-${count.index}" })
-}
+  public_subnet_tags = {
+    "kubernetes.io/role/elb"                    = 1
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    Name                                        = "${var.cluster_name}-eks-public"
 
-// Create the natgate way
-resource "aws_eip" "ngweip" {
-  count = local.azs
-  tags  = merge(var.tags, { Name = "${var.vpc_name}-ngw-eip-${count.index}" })
-}
-
-resource "aws_nat_gateway" "ngw" {
-  count         = local.azs
-  subnet_id     = element(aws_subnet.private[*].id, count.index)
-  allocation_id = element(aws_eip.ngweip[*].id, count.index)
-  tags          = merge(var.tags, { Name = "${var.vpc_name}-ngw-gateway-${count.index}" })
-}
-
-// create the route table for private subnet
-resource "aws_route_table" "minhquang-private-rtb" {
-  count  = local.azs
-  vpc_id = aws_vpc.minhquang-vpc.id
-  tags   = merge(var.tags, { Name = "${var.vpc_name}-private-rtb" })
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = element(aws_nat_gateway.ngw.*.id, count.index)
   }
-}
 
-// Assosiate the private subnet to the private route table
-resource "aws_route_table_association" "minhquang-private-subnet-rtb" {
-  count          = local.azs
-  subnet_id      = element(aws_subnet.private[*].id, count.index)
-  route_table_id = element(aws_route_table.minhquang-private-rtb[*].id, count.index)
-}
+  private_subnet_tags = {
+    Name                                        = "${var.cluster_name}-eks-private"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
 
+    "kubernetes.io/role/internal-elb" = 1
+  }
+
+  tags = merge(var.default_tags, {
+    Name                                        = "${var.cluster_name}-vpc"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+  })
+}
