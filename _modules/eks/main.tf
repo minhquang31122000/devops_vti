@@ -12,9 +12,9 @@ resource "aws_eks_cluster" "eks" {
 
   enabled_cluster_log_types = var.eks_cw_logging
 
-  access_config {
-    authentication_mode = "API_AND_CONFIG_MAP"
-  }
+  # access_config {
+  #   authentication_mode = "API_AND_CONFIG_MAP"
+  # }
 
   encryption_config {
     resources = ["secrets"]
