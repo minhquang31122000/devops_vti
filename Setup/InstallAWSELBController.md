@@ -6,7 +6,7 @@ add the iam policy
 step 1: curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json
 
 step 2: aws iam create-policy \
- --policy-name AWSLoadBalancerControllerIAMPolicy \
+ --policy-name MQ1AWSLoadBalancerControllerIAMPolicy \
  --policy-document file://iam_policy.json \
  --profile default
 
@@ -20,9 +20,9 @@ eksctl create iamserviceaccount \
 --override-existing-serviceaccounts \
 --cluster=minhquangeks \
 --namespace=kube-system \
---name=mq-awslb-controller \
---role-name MQAmazonEKSLoadBalancerControllerRole \
---attach-policy-arn=arn:aws:iam::084375555299:policy/MQAWSLoadBalancerControllerIAMPolicy \
+--name=mq1-awslb-controller \
+--role-name MQ1AmazonEKSLoadBalancerControllerRole \
+--attach-policy-arn=arn:aws:iam::084375555299:policy/MQ1AWSLoadBalancerControllerIAMPolicy \
 --approve \
 --profile default \
 --region ap-southeast-1
@@ -33,7 +33,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 -n kube-system \
 --set clusterName=minhquangeks \
 --set serviceAccount.create=false \
---set serviceAccount.name=mq-awslb-controller \
+--set serviceAccount.name=mq1-awslb-controller \
 --set region=ap-southeast-1 \
 --set vpcId=vpc-04a4803405e1065f7
 

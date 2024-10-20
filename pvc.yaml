@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    meta.helm.sh/release-name: prometheus
+    meta.helm.sh/release-namespace: prometheus
+    pv.kubernetes.io/bind-completed: "yes"
+    pv.kubernetes.io/bound-by-controller: "yes"
+    volume.beta.kubernetes.io/storage-provisioner: openebs.io/local
+    volume.kubernetes.io/selected-node: ip-10-0-4-83.ap-southeast-1.compute.internal
+    volume.kubernetes.io/storage-provisioner: openebs.io/local
+  creationTimestamp: "2024-10-11T10:30:47Z"
+  finalizers:
+  - kubernetes.io/pvc-protection
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: prometheus
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: prometheus
+    app.kubernetes.io/version: v2.54.1
+    helm.sh/chart: prometheus-25.27.0
+  name: prometheus-server
+  namespace: prometheus
+  resourceVersion: "11235"
+  uid: 25dc2328-e732-44c3-9056-8a179670bd01
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: openebs-hostpath
+  volumeMode: Filesystem
+  volumeName: pvc-25dc2328-e732-44c3-9056-8a179670bd01
+status:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 8Gi
+  phase: Bound
