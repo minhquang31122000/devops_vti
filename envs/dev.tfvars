@@ -1,6 +1,6 @@
 
 env_prefix                             = "dev"
-vpc_name                               = "minhquang-vpc"
+vpc_name                               = "peter-vpc"
 cidrvpc                                = "10.0.0.0/16"
 enable_nat_gateway                     = true
 single_nat_gateway                     = true
@@ -12,7 +12,7 @@ enable_flow_log                        = true
 create_flow_log_cloudwatch_iam_role    = true
 create_flow_log_cloudwatch_log_group   = true
 eks_config = {
-  cluster_name                                   = "minhquangeks"
+  cluster_name                                   = "petereks"
   cluster_version                                = "1.30"
   min_size                                       = 3
   max_size                                       = 9
@@ -56,7 +56,7 @@ bastion_definition = {
 
     user_data_base64 = null
     ext-tags = {
-      "fucnt" = "minhquang-demo-tf"
+      "fucnt" = "peter-demo-tf"
     }
   }
 }
