@@ -1,5 +1,5 @@
 variable "vpc_name" {
-  default = "peter-vpc"
+  default = "mq-peter-vpc"
 }
 
 variable "cidrvpc" {
@@ -15,8 +15,8 @@ variable "cidrvpc" {
 
 variable "default_tags" {
   default = {
-    Name  = "peter-vpc"
-    Owner = "peter"
+    Name  = "mq-peter-vpc"
+    Owner = "mq-peter"
   }
 }
 
